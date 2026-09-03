@@ -64,64 +64,45 @@ public class Server {
                 out.println("Enter your name: ");
                 clientName = bufferedReader.readLine();
 
-                for (String s : history) {
+                for (String s : history)
                     out.println(s);
-                }
 
-                String message = clientName + " has joined the chat.";
-                System.out.println(message);
-                history.add(message);
-                if (history.size() > MAX_HISTORY_LENGTH) {
-                    history.remove(0);
-                }
-                for (ClientHandler clientHandler : clientHandlerList) {
-                    if (clientHandler != this && clientHandler.clientName != null) {
-                        try {
-                            clientHandler.out.println(message);
-                        } catch (Exception e) {
-                            // client déconnecté ?
-                        }
-                    }
-                }
+                sendMessage(clientName + " has joined the chat.");
 
                 String input;
-                while ((input = bufferedReader.readLine()) != null) {
-                    message = clientName + ": " + input;
-                    System.out.println(message);
-                    history.add(message);
-                    if (history.size() > MAX_HISTORY_LENGTH) {
-                        history.remove(0);
-                    }
-                    for (ClientHandler c : clientHandlerList) {
-                        if (c != this && c.clientName != null) {
-                            try {
-                                c.out.println(message);
-                            } catch (Exception e) {
-                                // client déconnecté ?
-                            }
-                        }
-                    }
-                }
+                while ((input = bufferedReader.readLine()) != null)
+                    sendMessage(clientName + ": " + input);
 
-                String exitMessage = clientName + " has left the chat.";
-                System.out.println(exitMessage);
-                history.add(exitMessage);
-                if (history.size() > MAX_HISTORY_LENGTH) {
-                    history.remove(0);
-                }
-                for (ClientHandler c : clientHandlerList) {
-                    if (c != this && c.clientName != null) {
-                        try {
-                            c.out.println(exitMessage);
-                        } catch (Exception e) {
-                            // client déconnecté ?
-                        }
-                    }
-                }
+                sendMessage(clientName + " has left the chat.");
 
             } catch (IOException e) {
                 System.out.println("Client error");
             }
+        }
+
+        private void sendMessage(String message) {
+            System.out.println(message);
+            history.add(message);
+            cleanHistory();
+            broadcastMessage(message);
+        }
+
+        private void broadcastMessage(String message) {
+            for (ClientHandler c : clientHandlerList) {
+                if (c != this && c.clientName != null) {
+                    try {
+                        c.out.println(message);
+                    } catch (Exception e) {
+                        // client déconnecté ?
+                    }
+                }
+            }
+        }
+    }
+
+    private void cleanHistory() {
+        if (history.size() > MAX_HISTORY_LENGTH) {
+            history.remove(0);
         }
     }
 }
