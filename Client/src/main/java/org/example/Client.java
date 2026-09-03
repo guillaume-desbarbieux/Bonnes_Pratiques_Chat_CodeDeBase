@@ -14,30 +14,30 @@ import org.slf4j.LoggerFactory;
 
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
-    private String adr;
-    private int p;
-    private Socket s;
-    private ExecutorService exec;
-    private BufferedReader lecteurConsole;
+    private String serverAddress;
+    private int serverPort;
+    private Socket socket;
+    private ExecutorService executor;
+    private BufferedReader bufferedReader;
     private int messageCount = 0;
     private Gson gson = new Gson();
 
     public Client(String serverAddress, int serverPort) {
-        this.adr = serverAddress;
-        this.p = serverPort;
+        this.serverAddress = serverAddress;
+        this.serverPort = serverPort;
     }
 
     // méthode pour se connecter
-    public void Connect() throws IOException, InterruptedException, ExecutionException {
-        s = new Socket(adr, p);
-        exec = Executors.newFixedThreadPool(2);
+    public void connect() throws IOException, InterruptedException, ExecutionException {
+        socket = new Socket(serverAddress, serverPort);
+        executor = Executors.newFixedThreadPool(2);
 
-        Future<?> t1 = exec.submit(this::receiveMessages);
+        Future<?> receiveTask = executor.submit(this::receiveMessages);
         Thread.sleep(100);
-        Future<?> t2 = exec.submit(this::sendMessages);
+        Future<?> sendTask = executor.submit(this::sendMessages);
 
-        t1.get();
-        t2.get();
+        receiveTask.get();
+        sendTask.get();
 
         shutdown();
     }
@@ -45,12 +45,12 @@ public class Client {
     // reception des messages
     private void receiveMessages() {
         try {
-            InputStream inputStream = s.getInputStream();
-            InputStreamReader isr = new InputStreamReader(inputStream);
-            BufferedReader r = new BufferedReader(isr);
-            String msg;
-            while ((msg = r.readLine()) != null) {
-                System.out.println("\r" + msg);
+            InputStream inputStream = socket.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String message;
+            while ((message = bufferedReader.readLine()) != null) {
+                System.out.println("\r" + message);
                 System.out.print("You: ");
             }
         } catch (IOException e) {
@@ -62,20 +62,20 @@ public class Client {
     // envoi messages
     private void sendMessages() {
         try {
-            OutputStream outputStream = s.getOutputStream();
+            OutputStream outputStream = socket.getOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(outputStream);
             BufferedWriter w = new BufferedWriter(osw);
-            lecteurConsole = new BufferedReader(new InputStreamReader(System.in));
+            bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             String input;
-            String auteur = null;
-            while ((input = lecteurConsole.readLine()) != null) {
+            String author = null;
+            while ((input = bufferedReader.readLine()) != null) {
                 w.write(input);
                 w.newLine();
                 w.flush();
-                if (auteur == null) {
-                    auteur = input;
+                if (author == null) {
+                    author = input;
                 } else {
-                    Message msg = new Message(auteur, input, new DateTime().toString());
+                    Message msg = new Message(author, input, new DateTime().toString());
                     String json = gson.toJson(msg);
                     logger.info(json);
                 }
@@ -89,35 +89,35 @@ public class Client {
 
     // arrêt propre
     private void shutdown() throws IOException {
-        if (exec != null) {
-            exec.shutdown();
+        if (executor != null) {
+            executor.shutdown();
         }
-        if (s != null && !s.isClosed()) {
-            s.close();
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
         }
     }
 
-    private String formatMessage(String msg) {
-        return msg.trim();
+    private String formatMessage(String message) {
+        return message.trim();
     }
 
     class Message{
-        private String auteur;
-        private String contenu;
+        private String author;
+        private String input;
         private String timestamp;
 
-        public Message(String auteur, String contenu, String timestamp) {
-            this.auteur = auteur;
-            this.contenu = contenu;
+        public Message(String author, String input, String timestamp) {
+            this.author = author;
+            this.input = input;
             this.timestamp = timestamp;
         }
 
-        public String getAuteur() {
-            return auteur;
+        public String getAuthor() {
+            return author;
         }
 
-        public String getContenu() {
-            return contenu;
+        public String getInput() {
+            return input;
         }
 
         public String getTimestamp() {

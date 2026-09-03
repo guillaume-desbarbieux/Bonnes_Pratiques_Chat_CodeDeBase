@@ -7,12 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 public class Main {
     public static void main(String[] args) {
         // Port du serveur
-        int p = 12345;
-        Server s = new Server(p);
+        int serverPort = 12345;
+        Server server = new Server(serverPort);
         try {
-            s.start();
+            server.start();
         } catch (IOException e) {
-            System.out.println("erreur");
+            System.out.println("error");
         }
         // System.out.println("Code inutile");
         // ArrayList<String> temp = new ArrayList<>();

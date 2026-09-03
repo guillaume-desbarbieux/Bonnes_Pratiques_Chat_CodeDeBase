@@ -10,95 +10,95 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.collect.Lists;
 
 public class Server {
-    private int p;
-    private List<ClientHandler> _clientsList = new ArrayList<>();
-    private ServerSocket ss;
+    private int serverP;
+    private List<ClientHandler> clientHandlerList = new ArrayList<>();
+    private ServerSocket serverSocket;
     private boolean isRunning = false;
-    private List<String> hist = new ArrayList<>();
-    private int count = 0;
+    private List<String> history = new ArrayList<>();
+    private int lastClientId = 0;
 
-    public Server(int port) {
-        this.p = port;
+    public Server(int serverPort) {
+        this.serverP = serverPort;
     }
 
     public void start() throws IOException {
-        ss = new ServerSocket();
-        ss.bind(new InetSocketAddress("0.0.0.0", p));
+        serverSocket = new ServerSocket();
+        serverSocket.bind(new InetSocketAddress("0.0.0.0", serverP));
         isRunning = true;
-        System.out.println("Chat server started on port " + p);
+        System.out.println("Chat server started on port " + serverP);
 
         while (isRunning) {
-            Socket cs = ss.accept();
-            ClientHandler ch = new ClientHandler(cs, this);
-            _clientsList.add(ch);
-            Thread t = new Thread(ch);
-            t.start();
+            Socket clientSocket = serverSocket.accept();
+            ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+            clientHandlerList.add(clientHandler);
+            Thread thread = new Thread(clientHandler);
+            thread.start();
         }
     }
 
     public void stop() throws IOException {
         isRunning = false;
-        if (ss != null && !ss.isClosed()) {
-            ss.close();
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            serverSocket.close();
         }
     }
 
     // Classe interne pour gérer chaque client
     class ClientHandler implements Runnable {
-        Socket s;
+        Socket socket;
         PrintWriter out;
-        String nomUtilisateur;
+        String clientName;
         private int clientId;
 
         public ClientHandler(Socket socket, Server srv) {
-            this.s = socket;
-            this.clientId = count++;
+            this.socket = socket;
+            this.clientId = lastClientId++;
         }
 
         public void run() {
             try {
-                InputStream in = s.getInputStream();
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                OutputStream outStream = s.getOutputStream();
-                out = new PrintWriter(new OutputStreamWriter(outStream), true);
+                InputStream inputStream = socket.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                OutputStream outputStream = socket.getOutputStream();
+                out = new PrintWriter(new OutputStreamWriter(outputStream), true);
 
                 out.println("Enter your name: ");
-                nomUtilisateur = r.readLine();
+                clientName = bufferedReader.readLine();
 
-                for (int i = 0; i < hist.size(); i++) {
-                    out.println(hist.get(i));
+                for (int i = 0; i < history.size(); i++) {
+                    out.println(history.get(i));
                 }
 
-                String m = nomUtilisateur + " has joined the chat.";
-                System.out.println(m);
-                hist.add(m);
-                if (hist.size() > 100) {
-                    hist.remove(0);
+                String message = clientName + " has joined the chat.";
+                System.out.println(message);
+                history.add(message);
+                if (history.size() > 100) {
+                    history.remove(0);
                 }
-                for (int i = 0; i < _clientsList.size(); i++) {
-                    ClientHandler c = _clientsList.get(i);
-                    if (c != this && c.nomUtilisateur != null) {
+                for (int i = 0; i < clientHandlerList.size(); i++) {
+                    ClientHandler clientHandler = clientHandlerList.get(i);
+                    if (clientHandler != this && clientHandler.clientName != null) {
                         try {
-                            c.out.println(m);
+                            clientHandler.out.println(message);
                         } catch (Exception e) {
                             // client déconnecté ?
                         }
                     }
                 }
 
-                String messageRecu;
-                while ((messageRecu = r.readLine()) != null) {
-                    m = nomUtilisateur + ": " + messageRecu;
-                    System.out.println(m);
-                    hist.add(m);
-                    if (hist.size() > 100) {
-                        hist.remove(0);
+                String input;
+                while ((input = bufferedReader.readLine()) != null) {
+                    message = clientName + ": " + input;
+                    System.out.println(message);
+                    history.add(message);
+                    if (history.size() > 100) {
+                        history.remove(0);
                     }
-                    for (int i = 0; i < _clientsList.size(); i++) {
-                        ClientHandler c = _clientsList.get(i);
-                        if (c != this && c.nomUtilisateur != null) {
+                    for (int i = 0; i < clientHandlerList.size(); i++) {
+                        ClientHandler c = clientHandlerList.get(i);
+                        if (c != this && c.clientName != null) {
                             try {
-                                c.out.println(m);
+                                c.out.println(message);
                             } catch (Exception e) {
                                 // client déconnecté ?
                             }
@@ -106,17 +106,17 @@ public class Server {
                     }
                 }
 
-                String msgLeave = nomUtilisateur + " has left the chat.";
-                System.out.println(msgLeave);
-                hist.add(msgLeave);
-                if (hist.size() > 100) {
-                    hist.remove(0);
+                String exitMessage = clientName + " has left the chat.";
+                System.out.println(exitMessage);
+                history.add(exitMessage);
+                if (history.size() > 100) {
+                    history.remove(0);
                 }
-                for (int i = 0; i < _clientsList.size(); i++) {
-                    ClientHandler c = _clientsList.get(i);
-                    if (c != this && c.nomUtilisateur != null) {
+                for (int i = 0; i < clientHandlerList.size(); i++) {
+                    ClientHandler c = clientHandlerList.get(i);
+                    if (c != this && c.clientName != null) {
                         try {
-                            c.out.println(msgLeave);
+                            c.out.println(exitMessage);
                         } catch (Exception e) {
                             // client déconnecté ?
                         }
