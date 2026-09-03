@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 
 public class Client {
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
-    private String serverAddress;
-    private int serverPort;
+    private final String serverAddress;
+    private final int serverPort;
     private Socket socket;
     private ExecutorService executor;
     private BufferedReader bufferedReader;
     private int messageCount = 0;
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
@@ -59,15 +59,15 @@ public class Client {
     private void sendMessages() {
         try {
             OutputStream outputStream = socket.getOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(outputStream);
-            BufferedWriter w = new BufferedWriter(osw);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
             bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             String input;
             String author = null;
             while ((input = bufferedReader.readLine()) != null) {
-                w.write(input);
-                w.newLine();
-                w.flush();
+                bufferedWriter.write(input);
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
                 if (author == null) {
                     author = input;
                 } else {
@@ -93,9 +93,9 @@ public class Client {
     }
 
     class Message{
-        private String author;
-        private String input;
-        private String timestamp;
+        private final String author;
+        private final String input;
+        private final String timestamp;
 
         public Message(String author, String input, String timestamp) {
             this.author = author;

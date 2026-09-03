@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
-    private int serverPort;
-    private List<ClientHandler> clientHandlerList = new ArrayList<>();
+    private final int serverPort;
+    private final List<ClientHandler> clientHandlerList = new ArrayList<>();
     private ServerSocket serverSocket;
     private boolean isRunning = false;
-    private List<String> history = new ArrayList<>();
+    private final List<String> history = new ArrayList<>();
     private int lastClientId = 0;
     private final int MAX_HISTORY_LENGTH = 100;
     private final String HOSTNAME = "0.0.0.0";
@@ -64,8 +64,8 @@ public class Server {
                 out.println("Enter your name: ");
                 clientName = bufferedReader.readLine();
 
-                for (int i = 0; i < history.size(); i++) {
-                    out.println(history.get(i));
+                for (String s : history) {
+                    out.println(s);
                 }
 
                 String message = clientName + " has joined the chat.";
@@ -74,8 +74,7 @@ public class Server {
                 if (history.size() > MAX_HISTORY_LENGTH) {
                     history.remove(0);
                 }
-                for (int i = 0; i < clientHandlerList.size(); i++) {
-                    ClientHandler clientHandler = clientHandlerList.get(i);
+                for (ClientHandler clientHandler : clientHandlerList) {
                     if (clientHandler != this && clientHandler.clientName != null) {
                         try {
                             clientHandler.out.println(message);
@@ -93,8 +92,7 @@ public class Server {
                     if (history.size() > MAX_HISTORY_LENGTH) {
                         history.remove(0);
                     }
-                    for (int i = 0; i < clientHandlerList.size(); i++) {
-                        ClientHandler c = clientHandlerList.get(i);
+                    for (ClientHandler c : clientHandlerList) {
                         if (c != this && c.clientName != null) {
                             try {
                                 c.out.println(message);
@@ -111,8 +109,7 @@ public class Server {
                 if (history.size() > MAX_HISTORY_LENGTH) {
                     history.remove(0);
                 }
-                for (int i = 0; i < clientHandlerList.size(); i++) {
-                    ClientHandler c = clientHandlerList.get(i);
+                for (ClientHandler c : clientHandlerList) {
                     if (c != this && c.clientName != null) {
                         try {
                             c.out.println(exitMessage);
