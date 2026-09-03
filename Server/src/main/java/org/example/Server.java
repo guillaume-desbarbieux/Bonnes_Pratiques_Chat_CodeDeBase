@@ -10,22 +10,24 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.collect.Lists;
 
 public class Server {
-    private int serverP;
+    private int serverPort;
     private List<ClientHandler> clientHandlerList = new ArrayList<>();
     private ServerSocket serverSocket;
     private boolean isRunning = false;
     private List<String> history = new ArrayList<>();
     private int lastClientId = 0;
+    private final int MAX_HISTORY_LENGTH = 100;
+    private final String HOSTNAME = "0.0.0.0";
 
     public Server(int serverPort) {
-        this.serverP = serverPort;
+        this.serverPort = serverPort;
     }
 
     public void start() throws IOException {
         serverSocket = new ServerSocket();
-        serverSocket.bind(new InetSocketAddress("0.0.0.0", serverP));
+        serverSocket.bind(new InetSocketAddress(HOSTNAME, serverPort));
         isRunning = true;
-        System.out.println("Chat server started on port " + serverP);
+        System.out.println("Chat server started on port " + serverPort);
 
         while (isRunning) {
             Socket clientSocket = serverSocket.accept();
@@ -72,7 +74,7 @@ public class Server {
                 String message = clientName + " has joined the chat.";
                 System.out.println(message);
                 history.add(message);
-                if (history.size() > 100) {
+                if (history.size() > MAX_HISTORY_LENGTH) {
                     history.remove(0);
                 }
                 for (int i = 0; i < clientHandlerList.size(); i++) {
@@ -91,7 +93,7 @@ public class Server {
                     message = clientName + ": " + input;
                     System.out.println(message);
                     history.add(message);
-                    if (history.size() > 100) {
+                    if (history.size() > MAX_HISTORY_LENGTH) {
                         history.remove(0);
                     }
                     for (int i = 0; i < clientHandlerList.size(); i++) {
@@ -109,7 +111,7 @@ public class Server {
                 String exitMessage = clientName + " has left the chat.";
                 System.out.println(exitMessage);
                 history.add(exitMessage);
-                if (history.size() > 100) {
+                if (history.size() > MAX_HISTORY_LENGTH) {
                     history.remove(0);
                 }
                 for (int i = 0; i < clientHandlerList.size(); i++) {
