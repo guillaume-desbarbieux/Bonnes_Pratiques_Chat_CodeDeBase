@@ -3,7 +3,6 @@ package org.example;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-// Main du client
 public class Main {
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 12345;
@@ -16,6 +15,5 @@ public class Main {
         } catch (IOException | InterruptedException | ExecutionException e) {
             System.out.println("Failed");
         }
-        // System.out.println("Client terminé");
     }
 }

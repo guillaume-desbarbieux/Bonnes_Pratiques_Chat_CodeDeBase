@@ -6,8 +6,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
-import com.google.common.collect.Lists;
 
 public class Server {
     private int serverPort;
@@ -45,7 +43,6 @@ public class Server {
         }
     }
 
-    // Classe interne pour gérer chaque client
     class ClientHandler implements Runnable {
         Socket socket;
         PrintWriter out;

@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -27,7 +26,6 @@ public class Client {
         this.serverPort = serverPort;
     }
 
-    // méthode pour se connecter
     public void connect() throws IOException, InterruptedException, ExecutionException {
         socket = new Socket(serverAddress, serverPort);
         executor = Executors.newFixedThreadPool(2);
@@ -42,7 +40,6 @@ public class Client {
         shutdown();
     }
 
-    // reception des messages
     private void receiveMessages() {
         try {
             InputStream inputStream = socket.getInputStream();
@@ -59,7 +56,6 @@ public class Client {
         // TODO: fermer le reader
     }
 
-    // envoi messages
     private void sendMessages() {
         try {
             OutputStream outputStream = socket.getOutputStream();
@@ -87,7 +83,6 @@ public class Client {
         }
     }
 
-    // arrêt propre
     private void shutdown() throws IOException {
         if (executor != null) {
             executor.shutdown();
@@ -95,10 +90,6 @@ public class Client {
         if (socket != null && !socket.isClosed()) {
             socket.close();
         }
-    }
-
-    private String formatMessage(String message) {
-        return message.trim();
     }
 
     class Message{
