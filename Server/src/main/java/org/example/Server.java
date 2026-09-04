@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final int MAX_MESSAGE_LENGTH = 1000;
     private final int serverPort;
     private final List<ClientHandler> clientHandlerList = new ArrayList<>();
     private ServerSocket serverSocket;
@@ -84,7 +85,7 @@ public class Server {
         Socket socket;
         PrintWriter out;
         String clientName;
-        private int clientId;
+        private final int clientId;
 
         /**
          * Constructs a ClientHandler instance to manage communication with a single client. This
@@ -121,21 +122,36 @@ public class Server {
                 out.println("Enter your name: ");
                 clientName = bufferedReader.readLine();
 
+                while (clientName == null || clientName.isBlank()) {
+                    out.println("Invalid name. Please enter a valid name: ");
+                    clientName = bufferedReader.readLine();
+                }
+
                 for (String s : history) {
                     out.println(s);
                 }
-
                 sendMessage(clientName + " has joined the chat.");
 
                 String input;
                 while ((input = bufferedReader.readLine()) != null) {
+                    if (input.isBlank()) {
+                        continue;
+                    }
+
+                    if (input.length() > MAX_MESSAGE_LENGTH) {
+                        out.println("Message is too long. Please enter a message less than " + MAX_MESSAGE_LENGTH + " characters.");
+                        continue;
+                    }
+
                     sendMessage(clientName + ": " + input);
                 }
             } catch (IOException e) {
-                logger.error("I/O error for client " + clientId, e);
+                logger.error("I/O error for client {}", clientId, e);
             } finally {
                 closeClientSocket();
-                sendMessage(clientName + " has left the chat.");
+                if (clientName != null && !clientName.isBlank()) {
+                    sendMessage(clientName + " has left the chat.");
+                }
             }
         }
 
@@ -145,7 +161,7 @@ public class Server {
                     socket.close();
                 }
             } catch (IOException e) {
-                logger.error("Error while closing socket for client " + clientId, e);
+                logger.error("Error while closing socket for client {}", clientId, e);
             } finally {
                 clientHandlerList.remove(this);
             }
@@ -164,7 +180,7 @@ public class Server {
                     try {
                         c.out.println(message);
                     } catch (Exception e) {
-                        logger.error("Error while broadcasting message to client " + c.clientId, e);
+                        logger.error("Error while broadcasting message to client {}", c.clientId, e);
                     }
                 }
             }
