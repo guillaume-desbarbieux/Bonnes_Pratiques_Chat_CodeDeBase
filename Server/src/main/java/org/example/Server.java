@@ -131,13 +131,11 @@ public class Server {
                 while ((input = bufferedReader.readLine()) != null) {
                     sendMessage(clientName + ": " + input);
                 }
-
-                sendMessage(clientName + " has left the chat.");
-
             } catch (IOException e) {
                 logger.error("I/O error for client " + clientId, e);
             } finally {
                 closeClientSocket();
+                sendMessage(clientName + " has left the chat.");
             }
         }
 
@@ -148,6 +146,8 @@ public class Server {
                 }
             } catch (IOException e) {
                 logger.error("Error while closing socket for client " + clientId, e);
+            } finally {
+                clientHandlerList.remove(this);
             }
         }
 
