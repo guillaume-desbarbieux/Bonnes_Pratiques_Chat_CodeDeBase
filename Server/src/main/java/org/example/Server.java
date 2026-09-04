@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
     private static final int MAX_MESSAGE_LENGTH = 1000;
+    public static final int MAX_CLIENT_NAME_LENGTH = 20;
     private final int serverPort;
     private final List<ClientHandler> clientHandlerList = new ArrayList<>();
     private ServerSocket serverSocket;
@@ -122,7 +123,7 @@ public class Server {
                 out.println("Enter your name: ");
                 clientName = bufferedReader.readLine();
 
-                while (clientName == null || clientName.isBlank()) {
+                while (clientName == null || clientName.isBlank() || clientName.length() > MAX_CLIENT_NAME_LENGTH) {
                     out.println("Invalid name. Please enter a valid name: ");
                     clientName = bufferedReader.readLine();
                 }
@@ -168,6 +169,10 @@ public class Server {
         }
 
         private void sendMessage(String message) {
+            if (message == null || message.isBlank() || message.length() > MAX_MESSAGE_LENGTH) {
+                return;
+            }
+
             System.out.println(message);
             history.add(message);
             cleanHistory();
