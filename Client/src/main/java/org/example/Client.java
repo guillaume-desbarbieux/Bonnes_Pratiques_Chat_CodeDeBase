@@ -25,7 +25,7 @@ public class Client {
      * Constructs a new Client instance with the specified server address and port.
      *
      * @param serverAddress the address of the server to connect to
-     * @param serverPort the port of the server to connect to
+     * @param serverPort    the port of the server to connect to
      */
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
@@ -38,10 +38,10 @@ public class Client {
      * two asynchronous tasks for receiving and sending messages. It waits for both tasks
      * to complete before shutting down the resources.
      *
-     * @throws IOException if an I/O error occurs while creating the socket or during data transfer.
+     * @throws IOException          if an I/O error occurs while creating the socket or during data transfer.
      * @throws InterruptedException if the current thread is interrupted while waiting.
-     * @throws ExecutionException if an exception occurs during the execution of the
-     *         asynchronous tasks.
+     * @throws ExecutionException   if an exception occurs during the execution of the
+     *                              asynchronous tasks.
      */
     public void connect() throws IOException, InterruptedException, ExecutionException {
         socket = new Socket(serverAddress, serverPort);
@@ -115,7 +115,7 @@ public class Client {
      * Represents a message with an associated author, content, and timestamp.
      * This class is commonly used to encapsulate message data for communication purposes.
      */
-    class Message{
+    class Message {
         private final String author;
         private final String input;
         private final String timestamp;

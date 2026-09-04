@@ -28,7 +28,8 @@ public class Server {
 
     /**
      * Starts the chat server, allowing it to accept client connections and handle communication between them.
-     * This method initializes a server socket, binds it*/
+     * This method initializes a server socket, binds it
+     */
     public void start() throws IOException {
         serverSocket = new ServerSocket();
         serverSocket.bind(new InetSocketAddress(HOSTNAME, serverPort));
@@ -89,14 +90,14 @@ public class Server {
          * actions such as broadcasting messages and updating client state.
          * It also manages the connection lifecycle from the client's perspective,
          * including joining and leaving the chat.
-
+         * <p>
          * Key steps include:
          * - Initializing input and output streams for communication.
          * - Prompting the client to enter a name and broadcasting their arrival.
          * - Sending the chat history to the newly joined client.
          * - Continuously reading and broadcasting client messages until disconnection.
          * - Handling cleanup actions upon client disconnection.
-
+         * <p>
          * Exception Handling:
          * - Captures and logs `IOException` to handle communication errors.
          */
