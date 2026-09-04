@@ -17,10 +17,18 @@ public class Server {
     private final int MAX_HISTORY_LENGTH = 100;
     private final String HOSTNAME = "0.0.0.0";
 
+    /**
+     * Constructs a new Server instance that listens on the specified port.
+     *
+     * @param serverPort the port number on which the server will listen for incoming connections
+     */
     public Server(int serverPort) {
         this.serverPort = serverPort;
     }
 
+    /**
+     * Starts the chat server, allowing it to accept client connections and handle communication between them.
+     * This method initializes a server socket, binds it*/
     public void start() throws IOException {
         serverSocket = new ServerSocket();
         serverSocket.bind(new InetSocketAddress(HOSTNAME, serverPort));
@@ -36,6 +44,13 @@ public class Server {
         }
     }
 
+    /**
+     * Stops the server, halting its operation and closing the server socket if it is open.
+     * This method ensures that no further client connections are accepted and releases
+     * any currently active server socket resources.
+     *
+     * @throws IOException if an I/O error occurs while closing the server socket.
+     */
     public void stop() throws IOException {
         isRunning = false;
         if (serverSocket != null && !serverSocket.isClosed()) {
@@ -43,17 +58,49 @@ public class Server {
         }
     }
 
+    /**
+     * Handles communication with a single client in a multi-client chat server.
+     * This class is responsible for receiving messages from the client, broadcasting
+     * messages to other clients, and managing client-specific state such as name and ID.
+     *
+     * Each instance of this class runs on its own thread, allowing simultaneous communication
+     * with multiple clients.
+     */
     class ClientHandler implements Runnable {
         Socket socket;
         PrintWriter out;
         String clientName;
         private int clientId;
 
+        /**
+         * Constructs a ClientHandler instance to manage communication with a single client.
+         * This constructor initializes the client-specific socket and assigns a unique client ID.
+         *
+         * @param socket the Socket object representing the connection to the client
+         * @param srv the Server instance that manages this ClientHandler
+         */
         public ClientHandler(Socket socket, Server srv) {
             this.socket = socket;
             this.clientId = lastClientId++;
         }
 
+        /**
+         * Handles the main execution logic for the client communication thread.
+         * This method listens for client input, handles messages, and performs
+         * actions such as broadcasting messages and updating client state.
+         * It also manages the connection lifecycle from the client's perspective,
+         * including joining and leaving the chat.
+         *
+         * Key steps include:
+         * - Initializing input and output streams for communication.
+         * - Prompting the client to enter a name and broadcasting their arrival.
+         * - Sending the chat history to the newly joined client.
+         * - Continuously reading and broadcasting client messages until disconnection.
+         * - Handling cleanup actions upon client disconnection.
+         *
+         * Exception Handling:
+         * - Captures and logs `IOException` to handle communication errors.
+         */
         public void run() {
             try {
                 InputStream inputStream = socket.getInputStream();

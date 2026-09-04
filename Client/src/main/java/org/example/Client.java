@@ -21,11 +21,28 @@ public class Client {
     private int messageCount = 0;
     private final Gson gson = new Gson();
 
+    /**
+     * Constructs a new Client instance with the specified server address and port.
+     *
+     * @param serverAddress the address of the server to connect to
+     * @param serverPort the port of the server to connect to
+     */
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
 
+    /**
+     * Establishes a connection to the server and manages bidirectional communication.
+     * This method sets up the socket connection, initializes a thread pool, and starts
+     * two asynchronous tasks for receiving and sending messages. It waits for both tasks
+     * to complete before shutting down the resources.
+     *
+     * @throws IOException if an I/O error occurs while creating the socket or during data transfer.
+     * @throws InterruptedException if the current thread is interrupted while waiting.
+     * @throws ExecutionException if an exception occurs during the execution of the
+     *         asynchronous tasks.
+     */
     public void connect() throws IOException, InterruptedException, ExecutionException {
         socket = new Socket(serverAddress, serverPort);
         executor = Executors.newFixedThreadPool(2);
@@ -39,6 +56,7 @@ public class Client {
 
         shutdown();
     }
+
 
     private void receiveMessages() {
         try {
@@ -55,6 +73,7 @@ public class Client {
         }
         // TODO: fermer le reader
     }
+
 
     private void sendMessages() {
         try {
@@ -92,6 +111,10 @@ public class Client {
         }
     }
 
+    /**
+     * Represents a message with an associated author, content, and timestamp.
+     * This class is commonly used to encapsulate message data for communication purposes.
+     */
     class Message{
         private final String author;
         private final String input;
