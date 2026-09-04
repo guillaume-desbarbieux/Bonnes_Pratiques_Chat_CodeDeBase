@@ -1,6 +1,13 @@
 plugins {
     id("java")
     application
+    id("com.diffplug.spotless") version "7.2.1"
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
 }
 
 group = "org.example"
