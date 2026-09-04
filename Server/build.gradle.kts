@@ -22,7 +22,8 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("com.google.guava:guava:28.0-jre")
     implementation("org.json:json:20180813")
-    implementation("log4j:log4j:1.2.17")
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
 
     testImplementation(platform("org.junit:junit-bom:5.7.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
