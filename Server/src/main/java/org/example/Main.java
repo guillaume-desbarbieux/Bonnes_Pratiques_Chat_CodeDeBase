@@ -1,9 +1,8 @@
 package org.example;
 
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Main {
 
@@ -21,7 +20,7 @@ public class Main {
     try {
       server.start();
     } catch (IOException e) {
-      logger.error("Server failed",e);
+      logger.error("Server failed", e);
     }
   }
 }
