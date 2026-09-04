@@ -1,9 +1,13 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public class Main {
+  private static final Logger logger = LoggerFactory.getLogger(Main.class);
   private static final String SERVER_ADDRESS = "localhost";
   private static final int SERVER_PORT = 12345;
 
@@ -21,7 +25,7 @@ public class Main {
     try {
       client.connect();
     } catch (IOException | InterruptedException | ExecutionException e) {
-      System.out.println("Failed");
+      logger.error("Client failed", e);
     }
   }
 }

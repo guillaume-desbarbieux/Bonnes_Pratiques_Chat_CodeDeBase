@@ -1,9 +1,13 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class Main {
 
+  private static final Logger logger = LoggerFactory.getLogger(Main.class);
   private static final int SERVER_PORT = 12345;
 
   /**
@@ -17,7 +21,7 @@ public class Main {
     try {
       server.start();
     } catch (IOException e) {
-      System.out.println("error");
+      logger.error("Server failed",e);
     }
   }
 }
