@@ -11,10 +11,12 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.net.SocketTimeoutException;
 
 public class Server {
@@ -23,10 +25,10 @@ public class Server {
     private static final int MAX_MESSAGE_LENGTH = 1000;
     public static final int MAX_CLIENT_NAME_LENGTH = 20;
     private final int serverPort;
-    private final List<ClientHandler> clientHandlerList = new ArrayList<>();
+    private final List<ClientHandler> clientHandlerList = Collections.synchronizedList(new ArrayList<>());
     private ServerSocket serverSocket;
     private boolean isRunning = false;
-    private final List<String> history = new ArrayList<>();
+    private final List<String> history = Collections.synchronizedList(new ArrayList<>());
     private int lastClientId = 0;
     private final int MAX_HISTORY_LENGTH = 100;
     private final String HOSTNAME = "0.0.0.0";
@@ -35,7 +37,7 @@ public class Server {
      * Constructs a new Server instance that listens on the specified port.
      *
      * @param serverPort the port number on which the server will listen for
-     * incoming connections
+     *                   incoming connections
      */
     public Server(int serverPort) {
         this.serverPort = serverPort;
@@ -77,7 +79,7 @@ public class Server {
      * accepted and releases any currently active server socket resources.
      *
      * @throws IOException if an I/O error occurs while closing the server
-     * socket.
+     *                     socket.
      */
     public void stop() throws IOException {
         isRunning = false;
@@ -107,7 +109,7 @@ public class Server {
          * socket and assigns a unique client ID.
          *
          * @param socket the Socket object representing the connection to the
-         * client
+         *               client
          */
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -141,10 +143,10 @@ public class Server {
                 OutputStream outputStream = socket.getOutputStream();
                 out = new PrintWriter(new OutputStreamWriter(outputStream), true);
 
-        socket.setSoTimeout(10000);
+                socket.setSoTimeout(10000);
 
-        out.println("Enter your name: ");
-        clientName = bufferedReader.readLine();
+                out.println("Enter your name: ");
+                clientName = bufferedReader.readLine();
 
                 while (clientName == null
                         || clientName.isBlank()
@@ -153,12 +155,14 @@ public class Server {
                     clientName = bufferedReader.readLine();
                 }
 
-        socket.setSoTimeout(0);
+                socket.setSoTimeout(0);
 
-        for (String s : history) {
-          out.println(s);
-        }
-        sendMessage(clientName + " has joined the chat.");
+                synchronized (history) {
+                    for (String s : history) {
+                        out.println(s);
+                    }
+                }
+                sendMessage(clientName + " has joined the chat.");
 
                 String input;
 
@@ -168,8 +172,8 @@ public class Server {
                     } catch (MessageTooLongException e) {
                         out.println(
                                 "Message is too long. Please enter a message less than "
-                                + MAX_MESSAGE_LENGTH
-                                + " characters.");
+                                        + MAX_MESSAGE_LENGTH
+                                        + " characters.");
                         continue;
                     }
 
@@ -181,19 +185,19 @@ public class Server {
                         continue;
                     }
 
-          sendMessage(clientName + ": " + input);
+                    sendMessage(clientName + ": " + input);
+                }
+            } catch (SocketTimeoutException e) {
+                logger.info("Client {} timed out during authentication", clientId);
+            } catch (IOException e) {
+                logger.error("I/O error for client {}", clientId, e);
+            } finally {
+                closeClientSocket();
+                if (clientName != null && !clientName.isBlank()) {
+                    sendMessage(clientName + " has left the chat.");
+                }
+            }
         }
-      } catch (SocketTimeoutException e) {
-        logger.info("Client {} timed out during authentication", clientId);
-      } catch (IOException e) {
-        logger.error("I/O error for client {}", clientId, e);
-      } finally {
-        closeClientSocket();
-        if (clientName != null && !clientName.isBlank()) {
-          sendMessage(clientName + " has left the chat.");
-        }
-      }
-    }
 
         private void closeClientSocket() {
             try {
@@ -219,12 +223,14 @@ public class Server {
         }
 
         private void broadcastMessage(String message) {
-            for (ClientHandler c : clientHandlerList) {
-                if (c != this && c.clientName != null) {
-                    try {
-                        c.out.println(message);
-                    } catch (Exception e) {
-                        logger.error("Error while broadcasting message to client {}", c.clientId, e);
+            synchronized (clientHandlerList) {
+                for (ClientHandler c : clientHandlerList) {
+                    if (c != this && c.clientName != null) {
+                        try {
+                            c.out.println(message);
+                        } catch (Exception e) {
+                            logger.error("Error while broadcasting message to client {}", c.clientId, e);
+                        }
                     }
                 }
             }
