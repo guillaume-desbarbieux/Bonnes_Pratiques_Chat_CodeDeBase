@@ -26,7 +26,6 @@ public class Client {
     private final int serverPort;
     private Socket socket;
     private ExecutorService executor;
-    private BufferedReader reader;
     private int messageCount = 0;
     private final Gson gson = new Gson();
     private static final int MAX_MESSAGE_LENGTH = 1000;
@@ -95,7 +94,7 @@ public class Client {
             OutputStream outputStream = socket.getOutputStream();
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
             BufferedWriter writer = new BufferedWriter(outputStreamWriter);
-            reader = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
             String input;
             String clientName = null;
@@ -152,7 +151,7 @@ public class Client {
      * This class is commonly used to encapsulate message data for communication
      * purposes.
      */
-    class Message {
+    static class Message {
 
         private final String clientName;
         private final String input;

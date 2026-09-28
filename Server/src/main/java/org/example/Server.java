@@ -58,7 +58,7 @@ public class Server {
                 try {
                     Socket clientSocket = serverSocket.accept();
 
-                    ClientHandler clientHandler = new ClientHandler(clientSocket, this);
+                    ClientHandler clientHandler = new ClientHandler(clientSocket);
                     clientHandlerList.add(clientHandler);
                     Thread thread = new Thread(clientHandler);
                     thread.start();
@@ -108,9 +108,8 @@ public class Server {
          *
          * @param socket the Socket object representing the connection to the
          * client
-         * @param server the Server instance that manages this ClientHandler
          */
-        public ClientHandler(Socket socket, Server server) {
+        public ClientHandler(Socket socket) {
             this.socket = socket;
             this.clientId = lastClientId++;
         }
@@ -165,7 +164,7 @@ public class Server {
 
                 while (true) {
                     try {
-                        input = readLineWithLimit(bufferedReader, MAX_MESSAGE_LENGTH);
+                        input = readLineWithLimit(bufferedReader);
                     } catch (MessageTooLongException e) {
                         out.println(
                                 "Message is too long. Please enter a message less than "
@@ -231,7 +230,7 @@ public class Server {
             }
         }
 
-        private String readLineWithLimit(BufferedReader reader, int maxLength) throws IOException {
+        private String readLineWithLimit(BufferedReader reader) throws IOException {
             StringBuilder message = new StringBuilder();
 
             int character;
@@ -244,7 +243,7 @@ public class Server {
                     continue;
                 }
 
-                if (message.length() >= maxLength) {
+                if (message.length() >= Server.MAX_MESSAGE_LENGTH) {
                     while ((character = reader.read()) != -1 && character != '\n') {
                         // Rien à faire... On vide le reste de la ligne
                     }
