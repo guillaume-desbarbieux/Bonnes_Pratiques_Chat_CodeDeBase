@@ -133,6 +133,7 @@ public class Server {
          * Exception Handling: - Captures and logs `IOException` to handle
          * communication errors.
          */
+        @Override
         public void run() {
             try {
                 InputStream inputStream = socket.getInputStream();
