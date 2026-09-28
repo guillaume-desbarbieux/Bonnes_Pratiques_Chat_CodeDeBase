@@ -22,16 +22,26 @@ import java.net.SocketTimeoutException;
 public class Server {
 
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
+
     private static final int MAX_MESSAGE_LENGTH = 1000;
-    public static final int MAX_CLIENT_NAME_LENGTH = 20;
+    private static final int MAX_CLIENT_NAME_LENGTH = 20;
+    private static final int MAX_CONNECTIONS = 10;
+    private static final int RATE_LIMIT_CONNECTIONS = 5;
+    private static final long RATE_LIMIT_DURATION = 10000;
+
+    private int rateLimiteCount = 0;
+    private long rateLimitStart = System.currentTimeMillis();
+
+    private int lastClientId = 0;
+    private final int MAX_HISTORY_LENGTH = 100;
+    private final String HOSTNAME = "0.0.0.0";
+
     private final int serverPort;
     private final List<ClientHandler> clientHandlerList = Collections.synchronizedList(new ArrayList<>());
     private ServerSocket serverSocket;
     private boolean isRunning = false;
     private final List<String> history = Collections.synchronizedList(new ArrayList<>());
-    private int lastClientId = 0;
-    private final int MAX_HISTORY_LENGTH = 100;
-    private final String HOSTNAME = "0.0.0.0";
+
 
     /**
      * Constructs a new Server instance that listens on the specified port.
@@ -58,12 +68,28 @@ public class Server {
 
             while (isRunning) {
                 try {
+
                     Socket clientSocket = serverSocket.accept();
+
+                    if (isConnectionRateLimited()) {
+                        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                        out.println("Too many connections. Please try again later.");
+                        clientSocket.close();
+                        continue;
+                    }
+
+                    if (clientHandlerList.size() >= MAX_CONNECTIONS) {
+                        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                        out.println("Server is full. Please try again later.");
+                        clientSocket.close();
+                        continue;
+                    }
 
                     ClientHandler clientHandler = new ClientHandler(clientSocket);
                     clientHandlerList.add(clientHandler);
                     Thread thread = new Thread(clientHandler);
                     thread.start();
+
                 } catch (IOException e) {
                     logger.error("Error while accepting client connection", e);
                 }
@@ -93,7 +119,7 @@ public class Server {
      * Handles communication with a single client in a multi-client chat server.
      * This class is responsible for receiving messages from the client,
      * broadcasting messages to other clients, and managing client-specific
-     * state such as name and ID. Each instance of this class runs on its own
+     * states such as name and ID. Each instance of this class runs on its own
      * thread, allowing simultaneous communication with multiple clients.
      */
     class ClientHandler implements Runnable {
@@ -188,6 +214,7 @@ public class Server {
                     sendMessage(clientName + ": " + input);
                 }
             } catch (SocketTimeoutException e) {
+                out.println("Authentication timed out. Please try again faster !");
                 logger.info("Client {} timed out during authentication", clientId);
             } catch (IOException e) {
                 logger.error("I/O error for client {}", clientId, e);
@@ -249,7 +276,7 @@ public class Server {
                     continue;
                 }
 
-                if (message.length() >= Server.MAX_MESSAGE_LENGTH) {
+                if (message.length() >= MAX_MESSAGE_LENGTH) {
                     while ((character = reader.read()) != -1 && character != '\n') {
                         // Rien à faire... On vide le reste de la ligne
                     }
@@ -271,5 +298,18 @@ public class Server {
         if (history.size() > MAX_HISTORY_LENGTH) {
             history.remove(0);
         }
+    }
+
+    private boolean isConnectionRateLimited() {
+        long now = System.currentTimeMillis();
+
+        if (now - rateLimitStart >= RATE_LIMIT_DURATION) {
+            rateLimitStart = now;
+            rateLimiteCount = 0;
+        }
+
+        rateLimiteCount++;
+
+        return rateLimiteCount > RATE_LIMIT_CONNECTIONS;
     }
 }
