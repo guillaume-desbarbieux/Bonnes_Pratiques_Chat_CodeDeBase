@@ -96,7 +96,7 @@ public class Server {
      */
     class ClientHandler implements Runnable {
 
-        Socket socket;
+        final Socket socket;
         PrintWriter out;
         String clientName;
         private final int clientId;
