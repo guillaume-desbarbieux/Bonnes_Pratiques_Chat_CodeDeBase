@@ -1,7 +1,7 @@
 plugins {
     id("java")
     application
-    id("com.diffplug.spotless") version "7.2.1"
+    id("com.diffplug.spotless") version "8.10.3"
 }
 
 spotless {
@@ -18,14 +18,14 @@ repositories {
 }
 
 dependencies {
-    implementation("commons-io:commons-io:2.5")
-    implementation("org.apache.commons:commons-lang3:3.8")
-    implementation("com.google.code.gson:gson:2.8.5")
-    implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("ch.qos.logback:logback-classic:1.5.18")
-    implementation("joda-time:joda-time:2.9.9")
+    implementation("commons-io:commons-io:2.22.0")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
+    implementation("com.google.code.gson:gson:2.14.0")
+    implementation("org.slf4j:slf4j-api:2.1.0-alpha1")
+    implementation("ch.qos.logback:logback-classic:1.6.4")
+    implementation("joda-time:joda-time:2.14.4")
 
-    testImplementation(platform("org.junit:junit-bom:5.6.0"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
