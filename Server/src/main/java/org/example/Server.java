@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.net.SocketTimeoutException;
 
 public class Server {
   private static final Logger logger = LoggerFactory.getLogger(Server.class);
@@ -119,6 +120,8 @@ public class Server {
         OutputStream outputStream = socket.getOutputStream();
         out = new PrintWriter(new OutputStreamWriter(outputStream), true);
 
+        socket.setSoTimeout(10000);
+
         out.println("Enter your name: ");
         clientName = bufferedReader.readLine();
 
@@ -128,6 +131,8 @@ public class Server {
           out.println("Invalid name. Please enter a valid name: ");
           clientName = bufferedReader.readLine();
         }
+
+        socket.setSoTimeout(0);
 
         for (String s : history) {
           out.println(s);
@@ -150,6 +155,8 @@ public class Server {
 
           sendMessage(clientName + ": " + input);
         }
+      } catch (SocketTimeoutException e) {
+        logger.info("Client {} timed out during authentication", clientId);
       } catch (IOException e) {
         logger.error("I/O error for client {}", clientId, e);
       } finally {
