@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
-  private static final int SERVER_PORT = 12345;
 
   /**
    * The entry point of the application. This method initializes and starts the server on a

@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
 import org.example.model.Message;
 import org.example.network.TcpClient;
-import org.example.utils.ChatConstants;
+import org.example.utils.ChatConfig;
 import org.example.utils.InputValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,25 +20,22 @@ import org.slf4j.LoggerFactory;
 public class ChatClient {
     private static final Logger logger = LoggerFactory.getLogger(ChatClient.class);
 
-    private final String serverAddress;
-    private final int serverPort;
+    private final ChatConfig config;
     private final InputValidator validator;
     private final Gson gson;
 
-    public ChatClient(String serverAddress, int serverPort) {
-        this(serverAddress, serverPort, new InputValidator(), new Gson());
+    public ChatClient(ChatConfig config) {
+        this(config, new InputValidator(config), new Gson());
     }
 
-    public ChatClient(String serverAddress, int serverPort,
-                      InputValidator validator, Gson gson) {
-        this.serverAddress = serverAddress;
-        this.serverPort = serverPort;
+    public ChatClient(ChatConfig config, InputValidator validator, Gson gson) {
+        this.config = config;
         this.validator = validator;
         this.gson = gson;
     }
 
     public void connect() throws IOException, InterruptedException, ExecutionException {
-        try (TcpClient connection = new TcpClient(serverAddress, serverPort)) {
+        try (TcpClient connection = new TcpClient(config.getServerHost(), config.getServerPort())) {
             ExecutorService executor = Executors.newFixedThreadPool(2);
             try {
                 Future<?> receiveTask = executor.submit(() -> receiveMessages(connection));
@@ -75,13 +72,13 @@ public class ChatClient {
             while ((input = reader.readLine()) != null) {
                 if (clientName == null && !validator.isValidClientName(input)) {
                     System.out.println("Name is too long or empty. Maximum length is "
-                            + ChatConstants.MAX_CLIENT_NAME_LENGTH + " characters.");
+                            + config.getMaxClientNameLength() + " characters.");
                     continue;
                 }
 
                 if (!validator.isValidMessage(input)) {
                     System.out.println("Message is too long. Maximum length is "
-                            + ChatConstants.MAX_MESSAGE_LENGTH + " characters.");
+                            + config.getMaxMessageLength() + " characters.");
                     continue;
                 }
 

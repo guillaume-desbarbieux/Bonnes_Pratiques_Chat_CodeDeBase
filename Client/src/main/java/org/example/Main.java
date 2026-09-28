@@ -1,6 +1,8 @@
 package org.example;
 
 import org.example.client.ChatClient;
+import org.example.utils.AppConfig;
+import org.example.utils.ChatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +20,10 @@ public class Main {
      *             this method.
      */
     public static void main(String[] args) {
-
-        ChatClient client = new ChatClient(SERVER_ADDRESS, SERVER_PORT);
         try {
+            AppConfig config = new AppConfig();
+            ChatConfig chatConfig = new ChatConfig(config);
+            ChatClient client = new ChatClient(chatConfig);
             client.connect();
         } catch (Exception e) {
             logger.error("Client failed", e);
