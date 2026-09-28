@@ -8,30 +8,30 @@ import java.net.Socket;
 import org.example.utils.MessageReader;
 
 public class ClientConnection implements AutoCloseable {
-    private final Socket socket;
-    private final BufferedReader reader;
-    private final PrintWriter writer;
+  private final Socket socket;
+  private final BufferedReader reader;
+  private final PrintWriter writer;
 
-    public ClientConnection(Socket socket) throws IOException {
-        this.socket = socket;
-        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.writer = new PrintWriter(socket.getOutputStream(), true);
-    }
+  public ClientConnection(Socket socket) throws IOException {
+    this.socket = socket;
+    this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    this.writer = new PrintWriter(socket.getOutputStream(), true);
+  }
 
-    public void setReadTimeout(int timeoutMs) throws IOException {
-        socket.setSoTimeout(timeoutMs);
-    }
+  public void setReadTimeout(int timeoutMs) throws IOException {
+    socket.setSoTimeout(timeoutMs);
+  }
 
-    public String readLineWithLimit(int maxLength) throws IOException {
-        return new MessageReader(maxLength).readLineWithLimit(reader);
-    }
+  public String readLineWithLimit(int maxLength) throws IOException {
+    return new MessageReader(maxLength).readLineWithLimit(reader);
+  }
 
-    public void send(String message) {
-        writer.println(message);
-    }
+  public void send(String message) {
+    writer.println(message);
+  }
 
-    @Override
-    public void close() throws IOException {
-        socket.close();
-    }
+  @Override
+  public void close() throws IOException {
+    socket.close();
+  }
 }

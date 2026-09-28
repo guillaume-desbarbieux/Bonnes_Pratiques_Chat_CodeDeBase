@@ -6,18 +6,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TcpServer implements AutoCloseable {
-    private final ServerSocket serverSocket = new ServerSocket();
+  private final ServerSocket serverSocket = new ServerSocket();
 
-    public TcpServer(String hostname, int port) throws IOException {
-        serverSocket.bind(new InetSocketAddress(hostname, port));
-    }
+  public TcpServer(String hostname, int port) throws IOException {
+    serverSocket.bind(new InetSocketAddress(hostname, port));
+  }
 
-    public Socket accept() throws IOException {
-        return serverSocket.accept();
-    }
+  public Socket accept() throws IOException {
+    return serverSocket.accept();
+  }
 
-    @Override
-    public void close() throws IOException {
-        serverSocket.close();
-    }
+  @Override
+  public void close() throws IOException {
+    serverSocket.close();
+  }
 }
